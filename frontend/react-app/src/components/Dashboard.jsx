@@ -62,13 +62,6 @@ export default function Dashboard(props) {
               type={element.type}
             />
           ))}
-          {/* <div className="w-[90%] my-2 justify-center flex items-center ">
-            Click{" "}
-            <span>
-              <Link to="/view-transactions">here</Link>
-            </span>{" "}
-            to View All Transactions!
-          </div> */}
           <div className="w-[90%] my-2 flex justify-center items-center text-sm md:text-base text-zinc-300">
             Click
             <span className="ml-1">
@@ -83,6 +76,7 @@ export default function Dashboard(props) {
           </div>
         </div>
       </div>
+      <div className="w-screen py-7 bg-zinc-900 flex justify-center items-center border-t border-t-zinc-200">Hello</div>
     </>
   );
 }
