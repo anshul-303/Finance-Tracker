@@ -318,4 +318,21 @@ app.get("/get-account-balance", authMiddleware, async (req, res) => {
   }
 });
 
+//Newly added
+app.get("/api/ai-insights", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const pythonResponse = await fetch(`http://localhost:8001/api/ai/analytics/${userId}`);
+    const aiData = await pythonResponse.json();
+
+    // ADD THIS LOG HERE
+    console.log("Full AI Data from Python:", aiData);
+
+    res.status(200).json(aiData);
+  } catch (error) {
+    console.error("AI Bridge Error:", error);
+    res.status(500).json({ status: "error", message: "AI Backend unreachable" });
+  }
+});
+
 app.listen(process.env.PORT);

@@ -7,6 +7,7 @@ import ViewTransactions from "./components/ViewTransactions.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import { UserDataProvider } from "./contexts/userDataContext.jsx";
 import { useEffect } from "react";
+import AiDashboard from "./components/AiDashboard.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -62,6 +63,16 @@ function App() {
             element={
               isLoggedIn ? (
                 <Dashboard setIsLoggedIn={setIsLoggedIn} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/ai-dash"
+            element={
+              isLoggedIn ? (
+                <AiDashboard setIsLoggedIn={setIsLoggedIn} />
               ) : (
                 <Navigate to="/login" />
               )
