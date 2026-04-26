@@ -127,6 +127,18 @@ export default function Navbar(props) {
             >
               View transactions
             </Link>
+            <Link
+              to="/ai-dash"
+              onClick={() => {
+                setMenuOpen(false);
+                updateNavPage("AI-Dashboard");
+              }}
+              className={`nav-link ${
+                currentPage === "AI-Dashboard" ? `bg-zinc-700` : ""
+              }`}
+            >
+              AI Dashboard
+            </Link>
           </nav>
         </div>
       )}
@@ -172,6 +184,18 @@ export default function Navbar(props) {
             onClick={() => updateNavPage("View Transactions")}
           >
             View transactions
+          </Link>
+
+          <Link
+            to="/ai-dash"
+            className={`nav-link ${
+              currentPage === "AI-Dashboard"
+                ? `border border-zinc-700 rounded-sm px-1 `
+                : ""
+            }`}
+            onClick={() => updateNavPage("AI-Dashboard")}
+          >
+            AI-Dashboard
           </Link>
         </nav>
         <div>Hello {username}!</div>
