@@ -37,9 +37,7 @@ async def get_analytics(user_id: int):
         if not rows:
             return empty_response()
 
-        # -----------------------------
-        # Convert to DataFrame
-        # -----------------------------
+        #Conversion to data frame using pandas
         df = pd.DataFrame(rows)
 
         # Clean amount column
@@ -64,26 +62,23 @@ async def get_analytics(user_id: int):
             .str.lower()
         )
 
-        # Expense filter
+        # Expense filter : Gets the transactions which are labelled as expense
         expenses = df[df["type"] == "expense"].copy()
 
         if expenses.empty:
             return empty_response()
 
-        # -----------------------------
         # Basic Stats
-        # -----------------------------
-        avg_spend = float(expenses["amount"].mean())
+        avg_spend = float(expenses["amount"].mean()) #Mean
 
-        # -----------------------------
-        # Category Distribution
-        # -----------------------------
+        #Category Distribution
         cat_summary = (
             expenses.groupby("category")["amount"]
             .sum()
             .reset_index()
         )
 
+        #This gives data for chart to display cateogory wise spending
         chart_data = cat_summary.rename(
             columns={
                 "category": "name",
@@ -91,9 +86,7 @@ async def get_analytics(user_id: int):
             }
         ).to_dict(orient="records")
 
-        # -----------------------------
-        # Daily Spend for Prediction
-        # -----------------------------
+        #Daily score prediction 
         daily = (
             expenses.groupby(
                 expenses["transactionDate"].dt.date
@@ -108,22 +101,27 @@ async def get_analytics(user_id: int):
 
         prediction = avg_spend
 
+        #We can only train an ML model when the transaction is more than 1 and the days are also more than 1
         if len(daily) > 1:
             daily["days"] = daily["transactionDate"].map(
                 datetime.datetime.toordinal
             )
 
-            X = daily[["days"]].values
-            y = daily["amount"].values
+            X = daily[["days"]].values  #X values of the model are the dates
+            y = daily["amount"].values  #Y values of the mode are the amount
 
+            # Starting to train the model 
             model = LinearRegression()
             model.fit(X, y)
 
+            #Train the model for future period of 30 days.
             future_day = (
                 datetime.datetime.now() +
                 datetime.timedelta(days=30)
             ).toordinal()
+            
 
+            #
             prediction = float(
                 model.predict([[future_day]])[0]
             )
@@ -137,6 +135,7 @@ async def get_analytics(user_id: int):
 
         std_dev = expenses["amount"].std()
 
+        # Below is the calculation for z-score
         if std_dev > 0:
             z_scores = np.abs(
                 (expenses["amount"] - avg_spend) / std_dev

@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -36,7 +36,7 @@ app.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
       "insert into users (name, email, password) values (?, ?, ?);",
-      [name, email, hashedPassword]
+      [name, email, hashedPassword],
     );
     const [row] = await pool.query("SELECT userId FROM users where email=?;", [
       email,
@@ -74,7 +74,7 @@ app.post("/login", async (req, res) => {
           userId: foundUser[0].userId,
         },
         process.env.SECRET_KEY,
-        { expiresIn: "15h" }
+        { expiresIn: "15h" },
       );
       res.cookie("token", token, {
         maxAge: 3600000 * 15,
@@ -145,7 +145,7 @@ app.post("/add-transactions", authMiddleware, async (req, res) => {
       amount,
       category,
       description,
-      transactionDate
+      transactionDate,
     ); //Also updates the accounts table
     const rows = await getLatestTransactions(pool, req.userId);
     res
@@ -176,11 +176,11 @@ app.get(
     try {
       const [rows] = await pool.query(
         "SELECT * FROM transactions where userId=?;",
-        [req.userId]
+        [req.userId],
       );
       const [account] = await pool.query(
         " SELECT * FROM accounts where user=?;",
-        [req.userId]
+        [req.userId],
       );
       const data = {
         balance: account[0].balance,
@@ -195,14 +195,14 @@ app.get(
       console.log(error);
       res.status(500).json({ message: "Internal server error." });
     }
-  }
+  },
 );
 
 app.get("/get-all-transactions", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(
       "SELECT * FROM transactions where userId=? ORDER BY createdAt DESC;",
-      [req.userId]
+      [req.userId],
     );
     res.status(200).json({ message: "Data is received", data: rows });
   } catch (error) {
@@ -217,7 +217,7 @@ app.delete("/delete-transaction", authMiddleware, async (req, res) => {
     const transactions = await deleteTransaction(
       pool,
       req.userId,
-      transactionId
+      transactionId,
     );
     res
       .status(200)
@@ -246,7 +246,7 @@ app.put("/edit-transaction", authMiddleware, async (req, res) => {
       category,
       amount,
       description,
-      transactionDate
+      transactionDate,
     );
     res.status(200).json({ message: "Edit Sucessful!" });
   } catch (error) {
@@ -309,29 +309,36 @@ app.get("/load-income-by-category", authMiddleware, async (req, res) => {
 
 app.get("/get-account-balance", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT balance FROM accounts WHERE user=?;", [
-      req.userId,
-    ]);
-    res.status(200).json({ message: "Successful balance fetch!", balance:rows[0].balance });
+    const [rows] = await pool.query(
+      "SELECT balance FROM accounts WHERE user=?;",
+      [req.userId],
+    );
+    res
+      .status(200)
+      .json({ message: "Successful balance fetch!", balance: rows[0].balance });
   } catch (error) {
     console.log("Error detected :", error);
   }
 });
 
-//Newly added
+//Newly added to get the results from Linear regrssion and Z-score
 app.get("/api/ai-insights", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
-    const pythonResponse = await fetch(`http://localhost:8001/api/ai/analytics/${userId}`);
+    const pythonResponse = await fetch(
+      `http://localhost:8001/api/ai/analytics/${userId}`,
+    );
     const aiData = await pythonResponse.json();
 
     // ADD THIS LOG HERE
-    console.log("Full AI Data from Python:", aiData);
+    // console.log("Full AI Data from Python:", aiData);
 
     res.status(200).json(aiData);
   } catch (error) {
     console.error("AI Bridge Error:", error);
-    res.status(500).json({ status: "error", message: "AI Backend unreachable" });
+    res
+      .status(500)
+      .json({ status: "error", message: "AI Backend unreachable" });
   }
 });
 
